@@ -1,3 +1,5 @@
+import random
+
 # definitions
 def initial_grids(initial):
     positions = list(initial)
@@ -88,17 +90,30 @@ def check_part(grids):
         return "O"
 
 
-def make_move(grids, co):
+def user_make_move(grids, co):
     while True:
         x = co[0]
         y = co[1]
 
         if check_blank_position(grids, co):
-            grids[x - 1][y - 1] = check_part(grids)
+            grids[x - 1][y - 1] = "X"
             return grids
         else:
             print("This cell is occupied! Choose another one!")
             co = process_input()
+
+
+def computer_move_easy(grids):
+    blank_positions = []
+    for x in range(3):
+        for y in range(3):
+            if grids[x][y] == "_":
+                blank_positions.append([x, y])
+    p = random.choice(blank_positions)
+    x = p[0]
+    y = p[1]
+    grids[x][y] = "O"
+    return grids
 
 
 def check_end(grids):
@@ -110,17 +125,20 @@ def check_end(grids):
         return ""
 
 
-initials = input("Enter the cells: ")
-grid = initial_grids(initials)
+grid = initial_grids("_" * 9)
 print_grids(grid)
+while True:
+    if check_end(grid):
+        print(check_end(grid))
+        break
+    else:
+        if check_part(grid) == "X":
+            coordinates = process_input()
+            grid = user_make_move(grid, coordinates)
+        elif check_part(grid) == "O":
+            grid = computer_move_easy(grid)
+            print('Making move level "easy"')
+        print_grids(grid)
 
-
-coordinates = process_input()
-grid = make_move(grid, coordinates)
-print_grids(grid)
-if check_end(grid):
-    print(check_end(grid))
-else:
-    print("Game not finished")
 
 
