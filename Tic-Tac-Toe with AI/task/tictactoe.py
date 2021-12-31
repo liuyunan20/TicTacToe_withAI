@@ -125,6 +125,26 @@ def check_end(grids):
         return ""
 
 
+def menu():
+    while True:
+        user_in = input().split()
+        if user_in[0] == "start":
+            try:
+                x_part = user_in[1]
+                o_part = user_in[2]
+            except IndexError:
+                print("Bad parameters!")
+            else:
+                if x_part in ["easy", "user"] and o_part in ["easy", "user"]:
+                    return [x_part, o_part]
+                else:
+                    print("Bad parameters!")
+        elif user_in[0] == "exit":
+            return None
+        else:
+            print("Bad parameters!")
+
+
 grid = initial_grids("_" * 9)
 print_grids(grid)
 while True:
