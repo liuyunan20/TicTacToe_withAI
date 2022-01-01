@@ -1,5 +1,6 @@
 import random
 
+
 # definitions
 def initial_grids(initial):
     positions = list(initial)
@@ -75,19 +76,19 @@ def check_full(grids):
     return True
 
 
-# def check_part(grids):
-#     x_num = 0
-#     o_num = 0
-#     for x in range(3):
-#         for y in range(3):
-#             if grids[x][y] == "X":
-#                 x_num += 1
-#             elif grids[x][y] == "O":
-#                 o_num += 1
-#     if x_num == o_num:
-#         return "X"
-#     elif x_num > o_num:
-#         return "O"
+def check_part(grids):
+    x_num = 0
+    o_num = 0
+    for x in range(3):
+        for y in range(3):
+            if grids[x][y] == "X":
+                x_num += 1
+            elif grids[x][y] == "O":
+                o_num += 1
+    if x_num == o_num:
+        return "X"
+    elif x_num > o_num:
+        return "O"
 
 
 def make_move(grids, co, part):
@@ -95,6 +96,7 @@ def make_move(grids, co, part):
     y = co[1]
     if co in find_blank_positions(grids):
         grids[x][y] = part
+    return grids
 
 
 # def user_make_move(grids, co):
@@ -143,7 +145,7 @@ def check_end(grids):
 
 def menu():
     while True:
-        user_in = input().split()
+        user_in = input("Input command: ").split()
         if user_in[0] == "start":
             try:
                 x = user_in[1]
@@ -182,10 +184,10 @@ class TicTacToe:
         elif self.user_type == "easy":
             coordinates = random.choice(blank_positions)
             make_move(self.grid, coordinates, self.user_part)
+            print('Making move level "easy"')
             return self.grid
         else:
             print("Bad parameters!")
-
 
 
     # while True:
@@ -203,22 +205,25 @@ class TicTacToe:
     #         print_grids(grid)
 
 
-
-if menu():
+while True:
     parts = menu()
-    game
-    while True:
-        if check_end(grid):
-            print(check_end(grid))
-            break
-        else:
-            if check_part(grid) == "X":
-                coordinates = process_input()
-                grid = user_make_move(grid, coordinates)
-            elif check_part(grid) == "O":
-                grid = computer_move_easy(grid)
-                print('Making move level "easy"')
-            print_grids(grid)
+    if parts:
+        x_part = TicTacToe(parts[0], "X")
+        o_part = TicTacToe(parts[1], "O")
+        print_grids(TicTacToe.grid)
+        while True:
+            if check_end(TicTacToe.grid):
+                print(check_end(TicTacToe.grid))
+                TicTacToe.grid = initial_grids("_" * 9)
+                break
+            else:
+                if check_part(TicTacToe.grid) == "X":
+                    x_part.game()
+                elif check_part(TicTacToe.grid) == "O":
+                    o_part.game()
 
+                print_grids(TicTacToe.grid)
+    else:
+        break
 
 
