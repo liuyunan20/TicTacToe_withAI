@@ -139,22 +139,45 @@ def menu():
 
 class TicTacToe:
     grid = initial_grids("_" * 9)
-    win_cells = [[grid[0][0], grid[0][1], grid[0][2]],
-                 [grid[1][0], grid[1][1], grid[1][2]],
-                 [grid[2][0], grid[2][1], grid[2][2]],
-                 [grid[0][0], grid[1][0], grid[2][0]],
-                 [grid[0][1], grid[1][1], grid[2][1]],
-                 [grid[0][2], grid[1][2], grid[2][2]],
-                 [grid[0][0], grid[1][1], grid[2][2]],
-                 [grid[0][2], grid[1][1], grid[2][0]]
-                 ]
+    win_cells = []
+    win_cells_position = []
 
     def __init__(self, user_part):
         self.user_part = user_part
         self.blank_positions = []
         self.coordinates = []
+        self.opponent_part = self.opponent()
+
+    def opponent(self):
+        if self.user_part == "X":
+            self.opponent_part = "O"
+        else:
+            self.opponent_part = "X"
+        return self.opponent_part
+
+    def build_win_cells(self):
+        self.win_cells = [[self.grid[0][0], self.grid[0][1], self.grid[0][2]],
+                          [self.grid[1][0], self.grid[1][1], self.grid[1][2]],
+                          [self.grid[2][0], self.grid[2][1], self.grid[2][2]],
+                          [self.grid[0][0], self.grid[1][0], self.grid[2][0]],
+                          [self.grid[0][1], self.grid[1][1], self.grid[2][1]],
+                          [self.grid[0][2], self.grid[1][2], self.grid[2][2]],
+                          [self.grid[0][0], self.grid[1][1], self.grid[2][2]],
+                          [self.grid[0][2], self.grid[1][1], self.grid[2][0]]
+                          ]
+        self.win_cells_position = [[[0, 0], [0, 1], [0, 2]],
+                                   [[1, 0], [1, 1], [1, 2]],
+                                   [[2, 0], [2, 1], [2, 2]],
+                                   [[0, 0], [1, 0], [2, 0]],
+                                   [[0, 1], [1, 1], [2, 1]],
+                                   [[0, 2], [1, 2], [2, 2]],
+                                   [[0, 0], [1, 1], [2, 2]],
+                                   [[0, 2], [1, 1], [2, 0]]
+                                   ]
+        return self.win_cells
 
     def win_check(self):
+        self.build_win_cells()
         if ['X', 'X', 'X'] in self.win_cells:
             return "X wins"
         elif ['O', 'O', 'O'] in self.win_cells:
@@ -182,9 +205,11 @@ class TicTacToe:
         y = self.coordinates[1]
         if self.coordinates in self.find_blank_positions():
             self.grid[x][y] = self.user_part
+            print(f"move {self.user_part}")
         return self.grid
 
     def find_blank_positions(self):
+        self.blank_positions = []
         for x in range(3):
             for y in range(3):
                 if self.grid[x][y] == "_":
@@ -219,46 +244,64 @@ class ComputerEasy(TicTacToe):
 class ComputerMedium(TicTacToe):
 
     def play(self):
-        for win_cell in self.win_cells:
-            if win_cell.count("X") == 2 or win_cell.count("O") == 2:
-                i = win_cell.index("_")
-                win_cell[i] = self.user_part
-                print('Making move level "medium"')
-                return self.grid
+        self.build_win_cells()
+        opponent_point = None
+        my_point = None
+
+        for n in range(8):
+            if self.win_cells[n].count(self.opponent_part) == 2 and "_" in self.win_cells[n]:
+                i = self.win_cells[n].index("_")
+                opponent_point = self.win_cells_position[n][i]
+
+            if self.win_cells[n].count(self.user_part) == 2 and "_" in self.win_cells[n]:
+                i = self.win_cells[n].index("_")
+                my_point = self.win_cells_position[n][i]
+
+        if my_point:
+            self.coordinates = my_point
+        elif opponent_point:
+            self.coordinates = opponent_point
+        else:
+            blank_positions = self.find_blank_positions()
+            self.coordinates = random.choice(blank_positions)
+        self.make_move()
+        print('Making move level "medium"')
+        return self.grid
 
 
 while True:
-    while True:
-        parts = menu()
-        if parts:
-            if parts[0] == "user":
-                x_part = UserPlayer("X")
-            elif parts[0] == "easy":
-                x_part = ComputerEasy("X")
-            elif parts[0] == "medium":
-                x_part = ComputerMedium("X")
-            else:
-                print("Bad parameters!")
-            if parts[1] == "user":
-                o_part = UserPlayer("O")
-            elif parts[1] == "easy":
-                o_part = ComputerEasy("O")
-            elif parts[1] == "medium":
-                o_part = ComputerMedium("O")
-            else:
-                print("Bad parameters!")
-            print_grids(TicTacToe.grid)
+    parts = menu()
+    if parts:
+        if parts[0] == "user":
+            x_part = UserPlayer("X")
+        elif parts[0] == "easy":
+            x_part = ComputerEasy("X")
+        elif parts[0] == "medium":
+            x_part = ComputerMedium("X")
+        else:
+            print("Bad parameters!")
+        if parts[1] == "user":
+            o_part = UserPlayer("O")
+        elif parts[1] == "easy":
+            o_part = ComputerEasy("O")
+        elif parts[1] == "medium":
+            o_part = ComputerMedium("O")
+        else:
+            print("Bad parameters!")
+        print_grids(TicTacToe.grid)
 
         while True:
-            if TicTacToe.check_end():
-                print(TicTacToe.check_end())
+            if x_part.check_end():
+                print(x_part.check_end())
                 TicTacToe.grid = initial_grids("_" * 9)
                 break
             else:
                 if check_part(TicTacToe.grid) == "X":
                     x_part.play()
+                    print("x")
                 elif check_part(TicTacToe.grid) == "O":
                     o_part.play()
+                    print("o")
                 print_grids(TicTacToe.grid)
     else:
         break
