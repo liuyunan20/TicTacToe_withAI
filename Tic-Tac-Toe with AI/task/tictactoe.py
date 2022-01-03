@@ -13,23 +13,23 @@ def initial_grids(initial):
 
 
 # Analyze if there are 3 in a row
-def win_check(grids):
-    win_cells = [[grids[0][0], grids[0][1], grids[0][2]],
-                 [grids[1][0], grids[1][1], grids[1][2]],
-                 [grids[2][0], grids[2][1], grids[2][2]],
-                 [grids[0][0], grids[1][0], grids[2][0]],
-                 [grids[0][1], grids[1][1], grids[2][1]],
-                 [grids[0][2], grids[1][2], grids[2][2]],
-                 [grids[0][0], grids[1][1], grids[2][2]],
-                 [grids[0][2], grids[1][1], grids[2][0]]
-                 ]
-
-    if ['X', 'X', 'X'] in win_cells:
-        return "X wins"
-    elif ['O', 'O', 'O'] in win_cells:
-        return "O wins"
-    else:
-        return ""
+# def win_check(grids):
+#     win_cells = [[grids[0][0], grids[0][1], grids[0][2]],
+#                  [grids[1][0], grids[1][1], grids[1][2]],
+#                  [grids[2][0], grids[2][1], grids[2][2]],
+#                  [grids[0][0], grids[1][0], grids[2][0]],
+#                  [grids[0][1], grids[1][1], grids[2][1]],
+#                  [grids[0][2], grids[1][2], grids[2][2]],
+#                  [grids[0][0], grids[1][1], grids[2][2]],
+#                  [grids[0][2], grids[1][1], grids[2][0]]
+#                  ]
+#
+#     if ['X', 'X', 'X'] in win_cells:
+#         return "X wins"
+#     elif ['O', 'O', 'O'] in win_cells:
+#         return "O wins"
+#     else:
+#         return ""
 
 
 def print_grids(grids):
@@ -68,12 +68,12 @@ def process_input():
 #         return False
 
 
-def check_full(grids):
-    for x in range(3):
-        for y in range(3):
-            if grids[x][y] == "_":
-                return False
-    return True
+# def check_full(grids):
+#     for x in range(3):
+#         for y in range(3):
+#             if grids[x][y] == "_":
+#                 return False
+#     return True
 
 
 def check_part(grids):
@@ -91,56 +91,30 @@ def check_part(grids):
         return "O"
 
 
-def make_move(grids, co, part):
-    x = co[0]
-    y = co[1]
-    if co in find_blank_positions(grids):
-        grids[x][y] = part
-    return grids
+# def make_move(grids, co, part):
+#     x = co[0]
+#     y = co[1]
+#     if co in find_blank_positions(grids):
+#         grids[x][y] = part
+#     return grids
 
 
-# def user_make_move(grids, co):
-#     while True:
-#         x = co[0]
-#         y = co[1]
-#
-#         if check_blank_position(grids, co):
-#             grids[x - 1][y - 1] = "X"
-#             return grids
-#         else:
-#             print("This cell is occupied! Choose another one!")
-#             co = process_input()
-
-
-def find_blank_positions(grids):
-    blank_positions = []
-    for x in range(3):
-        for y in range(3):
-            if grids[x][y] == "_":
-                blank_positions.append([x, y])
-    return blank_positions
-
-
-# def computer_move_easy(grids):
+# def find_blank_positions(grids):
 #     blank_positions = []
 #     for x in range(3):
 #         for y in range(3):
 #             if grids[x][y] == "_":
 #                 blank_positions.append([x, y])
-#     p = random.choice(blank_positions)
-#     x = p[0]
-#     y = p[1]
-#     grids[x][y] = "O"
-#     return grids
+#     return blank_positions
 
 
-def check_end(grids):
-    if win_check(grids):
-        return win_check(grids)
-    elif check_full(grids):
-        return "Draw"
-    else:
-        return ""
+# def check_end(grids):
+#     if win_check(grids):
+#         return win_check(grids)
+#     elif check_full(grids):
+#         return "Draw"
+#     else:
+#         return ""
 
 
 def menu():
@@ -153,7 +127,7 @@ def menu():
             except IndexError:
                 print("Bad parameters!")
             else:
-                if x in ["easy", "user"] and o in ["easy", "user"]:
+                if x in ["easy", "user", "medium"] and o in ["easy", "user", "medium"]:
                     return [x, o]
                 else:
                     print("Bad parameters!")
@@ -165,63 +139,126 @@ def menu():
 
 class TicTacToe:
     grid = initial_grids("_" * 9)
+    win_cells = [[grid[0][0], grid[0][1], grid[0][2]],
+                 [grid[1][0], grid[1][1], grid[1][2]],
+                 [grid[2][0], grid[2][1], grid[2][2]],
+                 [grid[0][0], grid[1][0], grid[2][0]],
+                 [grid[0][1], grid[1][1], grid[2][1]],
+                 [grid[0][2], grid[1][2], grid[2][2]],
+                 [grid[0][0], grid[1][1], grid[2][2]],
+                 [grid[0][2], grid[1][1], grid[2][0]]
+                 ]
 
-    def __init__(self, user_type, user_part):
-        self.user_type = user_type
+    def __init__(self, user_part):
         self.user_part = user_part
+        self.blank_positions = []
+        self.coordinates = []
 
-    def game(self):
-        blank_positions = find_blank_positions(self.grid)
-        if self.user_type == "user":
-            coordinates = process_input()
-            while True:
-                if coordinates in blank_positions:
-                    make_move(self.grid, coordinates, self.user_part)
-                    return self.grid
-                else:
-                    print("This cell is occupied! Choose another one!")
-                    coordinates = process_input()
-        elif self.user_type == "easy":
-            coordinates = random.choice(blank_positions)
-            make_move(self.grid, coordinates, self.user_part)
-            print('Making move level "easy"')
-            return self.grid
+    def win_check(self):
+        if ['X', 'X', 'X'] in self.win_cells:
+            return "X wins"
+        elif ['O', 'O', 'O'] in self.win_cells:
+            return "O wins"
         else:
-            print("Bad parameters!")
+            return ""
+
+    def check_full(self):
+        for x in range(3):
+            for y in range(3):
+                if self.grid[x][y] == "_":
+                    return False
+        return True
+
+    def check_end(self):
+        if self.win_check():
+            return self.win_check()
+        elif self.check_full():
+            return "Draw"
+        else:
+            return ""
+
+    def make_move(self):
+        x = self.coordinates[0]
+        y = self.coordinates[1]
+        if self.coordinates in self.find_blank_positions():
+            self.grid[x][y] = self.user_part
+        return self.grid
+
+    def find_blank_positions(self):
+        for x in range(3):
+            for y in range(3):
+                if self.grid[x][y] == "_":
+                    self.blank_positions.append([x, y])
+        return self.blank_positions
 
 
-    # while True:
-    #     if check_end(grid):
-    #         print(check_end(grid))
-    #         break
-    #     else:
-    #
-    #         if check_part(grid) == "X":
-    #             coordinates = process_input()
-    #             grid = user_make_move(grid, coordinates)
-    #         elif check_part(grid) == "O":
-    #             grid = computer_move_easy(grid)
-    #             print('Making move level "easy"')
-    #         print_grids(grid)
+class UserPlayer(TicTacToe):
+
+    def play(self):
+        self.coordinates = process_input()
+        blank_positions = self.find_blank_positions()
+        while True:
+            if self.coordinates in blank_positions:
+                self.make_move()
+                return self.grid
+            else:
+                print("This cell is occupied! Choose another one!")
+                self.coordinates = process_input()
+
+
+class ComputerEasy(TicTacToe):
+
+    def play(self):
+        blank_positions = self.find_blank_positions()
+        self.coordinates = random.choice(blank_positions)
+        self.make_move()
+        print('Making move level "easy"')
+        return self.grid
+
+
+class ComputerMedium(TicTacToe):
+
+    def play(self):
+        for win_cell in self.win_cells:
+            if win_cell.count("X") == 2 or win_cell.count("O") == 2:
+                i = win_cell.index("_")
+                win_cell[i] = self.user_part
+                print('Making move level "medium"')
+                return self.grid
 
 
 while True:
-    parts = menu()
-    if parts:
-        x_part = TicTacToe(parts[0], "X")
-        o_part = TicTacToe(parts[1], "O")
-        print_grids(TicTacToe.grid)
+    while True:
+        parts = menu()
+        if parts:
+            if parts[0] == "user":
+                x_part = UserPlayer("X")
+            elif parts[0] == "easy":
+                x_part = ComputerEasy("X")
+            elif parts[0] == "medium":
+                x_part = ComputerMedium("X")
+            else:
+                print("Bad parameters!")
+            if parts[1] == "user":
+                o_part = UserPlayer("O")
+            elif parts[1] == "easy":
+                o_part = ComputerEasy("O")
+            elif parts[1] == "medium":
+                o_part = ComputerMedium("O")
+            else:
+                print("Bad parameters!")
+            print_grids(TicTacToe.grid)
+
         while True:
-            if check_end(TicTacToe.grid):
-                print(check_end(TicTacToe.grid))
+            if TicTacToe.check_end():
+                print(TicTacToe.check_end())
                 TicTacToe.grid = initial_grids("_" * 9)
                 break
             else:
                 if check_part(TicTacToe.grid) == "X":
-                    x_part.game()
+                    x_part.play()
                 elif check_part(TicTacToe.grid) == "O":
-                    o_part.game()
-
+                    o_part.play()
                 print_grids(TicTacToe.grid)
     else:
         break
