@@ -29,6 +29,12 @@ class Board:
                 grids[n].append(positions[m + 3 * n])
         return grids
 
+    def grid_is_empty(self):
+        if self.grid == [["_" for i in range(3)] for n in range(3)]:
+            return True
+        else:
+            return False
+
     def print_grids(self):
         print('---------')
         print('| ' + ' '.join(self.grid[0]) + ' |')
@@ -192,6 +198,7 @@ class ComputerMedium(Player):
 class ComputerHard(Player):
 
     def ai_make_move(self, board, part):
+        print(self.coordinates)
         x = self.coordinates[0]
         y = self.coordinates[1]
         if self.coordinates in board.blank_positions:
@@ -199,42 +206,79 @@ class ComputerHard(Player):
             board.win_cells = board.build_win_cells()
             board.blank_positions = board.find_blank_positions()
             board.result = board.check_end()
-            print(f"move {part}")
+            board.print_grids()
 
     def decide_co(self, board, part):
+        co_score = []
         score = 0
-        board.result = board.check_end()
-        co = tuple(self.coordinates)
-        if board.result:
-            if board.result.startswith(self.user_part):
-                score = 10
-            elif board.result.startswith(self.opponent_part):
-                score = -10
-            elif board.result.startswith("D"):
-                score = 0
-            return [co, score]
-        else:
-            scores = {}
-            for position in board.blank_positions:
-                new_board = board.clone()
-                self.coordinates = position
-                self.ai_make_move(new_board, part)
+        for position in board.blank_positions:
+            new_board = board.clone()
+            self.coordinates = position
+            self.ai_make_move(new_board, part)
+            new_board.result = new_board.check_end()
+            # check if there is a result for the move
+            if new_board.result:
+                if part == self.user_part:
+                    if new_board.result.startswith(self.user_part):
+                        score = 10
+                        return [position, score]
+                    elif new_board.result.startswith(self.opponent_part):
+                        score = -10
+                    elif new_board.result.startswith("D"):
+                        score = 0
+                    return [position, score]
+
+                if part == self.opponent_part:
+                    if new_board.result.startswith(self.user_part):
+                        score = 10
+                    elif new_board.result.startswith(self.opponent_part):
+                        score = -10
+                        return [position, score]
+                    elif new_board.result.startswith("D"):
+                        score = 0
+                    return [position, score]
+            else:
                 if part == self.user_part:
                     co_score = self.decide_co(new_board, self.opponent_part)
-                    scores[co_score[0]] = co_score[1]
+                    if co_score[1] == -10:
+                        score = -10
+                        print("return -10")
+                        return [position, score]
+                    elif co_score[1] == 0 and score > -10:
+                        score = 0
+                    elif co_score[1] == 10 and score > 0:
+                        score = 10
+                    if co_score:
+                        if score < co_score[1]:
+                            co_score = [position, score]
+                    else:
+                        co_score = [position, score]
+
                 elif part == self.opponent_part:
                     co_score = self.decide_co(new_board, self.user_part)
-                    scores[co_score[0]] = co_score[1]
-            if part == self.user_part:
-                score = max(list(scores.values()))
-            if part == self.opponent_part:
-                score = min(list(scores.values()))
-            return [co, score]
+                    if co_score[1] == 10:
+                        score = 10
+                        print("return 10")
+                        return [position, score]
+                    elif co_score[1] == 0 and score < 10:
+                        score = 0
+                    elif co_score[1] == -10 and score < 0:
+                        score = -10
+                    if co_score:
+                        if score > co_score[1]:
+                            co_score = [position, score]
+                        else:
+                            co_score = [position, score]
+        return co_score
 
     def play(self, board):
-        co_score = self.decide_co(board, self.user_part)
-        self.coordinates = list(co_score[0])
-        self.ai_make_move(board, self.coordinates)
+        if board.grid_is_empty():
+            self.coordinates = random.choice(board.blank_positions)
+            self.make_move(board)
+        else:
+            co_score = self.decide_co(board, self.user_part)
+            self.coordinates = co_score[0]
+            self.ai_make_move(board, self.user_part)
 
 
 def menu():
