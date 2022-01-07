@@ -175,6 +175,7 @@ class ComputerMedium(Player):
     def play(self, board):
         opponent_point = None
         my_point = None
+        board.win_cells = board.build_win_cells()
         for n in range(8):
             if board.win_cells[n].count(self.opponent_part) == 2 and "_" in board.win_cells[n]:
                 i = board.win_cells[n].index("_")
@@ -198,7 +199,7 @@ class ComputerMedium(Player):
 class ComputerHard(Player):
 
     def ai_make_move(self, board, part):
-        print(self.coordinates)
+        # print(self.coordinates)
         x = self.coordinates[0]
         y = self.coordinates[1]
         if self.coordinates in board.blank_positions:
@@ -206,70 +207,55 @@ class ComputerHard(Player):
             board.win_cells = board.build_win_cells()
             board.blank_positions = board.find_blank_positions()
             board.result = board.check_end()
-            board.print_grids()
+            # board.print_grids()
 
     def decide_co(self, board, part):
-        co_score = []
+        co_scores = []
         score = 0
         for position in board.blank_positions:
             new_board = board.clone()
             self.coordinates = position
             self.ai_make_move(new_board, part)
             new_board.result = new_board.check_end()
-            # check if there is a result for the move
+
             if new_board.result:
-                if part == self.user_part:
-                    if new_board.result.startswith(self.user_part):
-                        score = 10
-                        return [position, score]
-                    elif new_board.result.startswith(self.opponent_part):
-                        score = -10
-                    elif new_board.result.startswith("D"):
-                        score = 0
+                if part == self.user_part and new_board.result.startswith(self.user_part):
+                    score = 10
                     return [position, score]
 
-                if part == self.opponent_part:
-                    if new_board.result.startswith(self.user_part):
-                        score = 10
-                    elif new_board.result.startswith(self.opponent_part):
-                        score = -10
-                        return [position, score]
-                    elif new_board.result.startswith("D"):
-                        score = 0
+                elif part == self.opponent_part and new_board.result.startswith(self.opponent_part):
+                    score = -10
                     return [position, score]
+
+                else:
+                    return [position, 0]
+
             else:
                 if part == self.user_part:
                     co_score = self.decide_co(new_board, self.opponent_part)
-                    if co_score[1] == -10:
-                        score = -10
-                        print("return -10")
-                        return [position, score]
-                    elif co_score[1] == 0 and score > -10:
-                        score = 0
-                    elif co_score[1] == 10 and score > 0:
-                        score = 10
-                    if co_score:
-                        if score < co_score[1]:
-                            co_score = [position, score]
-                    else:
-                        co_score = [position, score]
+                    co_scores.append([position, co_score[1]])
 
-                elif part == self.opponent_part:
+                if part == self.opponent_part:
                     co_score = self.decide_co(new_board, self.user_part)
-                    if co_score[1] == 10:
-                        score = 10
-                        print("return 10")
-                        return [position, score]
-                    elif co_score[1] == 0 and score < 10:
-                        score = 0
-                    elif co_score[1] == -10 and score < 0:
-                        score = -10
-                    if co_score:
-                        if score > co_score[1]:
-                            co_score = [position, score]
-                        else:
-                            co_score = [position, score]
-        return co_score
+                    co_scores.append([position, co_score[1]])
+        result_score = None
+        if part == self.user_part:
+            for co_score in co_scores:
+                if co_score[1] == 10:
+                    return co_score
+                elif result_score is None:
+                    result_score = co_score
+                elif co_score[1] == 0:
+                    result_score = co_score
+        if part == self.opponent_part:
+            for co_score in co_scores:
+                if co_score[1] == -10:
+                    return co_score
+                elif result_score is None:
+                    result_score = co_score
+                elif co_score[1] == 0:
+                    result_score = co_score
+        return result_score
 
     def play(self, board):
         if board.grid_is_empty():
@@ -278,6 +264,7 @@ class ComputerHard(Player):
         else:
             co_score = self.decide_co(board, self.user_part)
             self.coordinates = co_score[0]
+            print('Making move level "hard"')
             self.ai_make_move(board, self.user_part)
 
 
@@ -307,6 +294,7 @@ while True:
     if parts:
         if parts[0] == "user":
             x_part = UserPlayer("X")
+            my_board.print_grids()
         elif parts[0] == "easy":
             x_part = ComputerEasy("X")
         elif parts[0] == "medium":
@@ -325,7 +313,6 @@ while True:
             o_part = ComputerHard("O")
         else:
             print("Bad parameters!")
-        my_board.print_grids()
 
         while True:
             if my_board.result:

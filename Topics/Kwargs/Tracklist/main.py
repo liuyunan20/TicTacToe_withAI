@@ -1,5 +1,5 @@
 def tracklist(**tracks):
-    for musician in tracks:
+    for musician, value in tracks.items():
         print(musician)
-        for song in tracks[musician]:
-            print(f"ALBUM: {song} TRACK: {tracks[musician][song]}")
+        for song, track in tracks[musician].items():
+            print(f"ALBUM: {song} TRACK: {track}")
